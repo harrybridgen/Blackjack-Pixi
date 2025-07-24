@@ -5,6 +5,7 @@ export class CardSprite extends Container {
   private background: Graphics;
   private valueText?: Text;
   private suitText?: Text;
+  private card?: Card;
   protected cardWidth = 100;
   protected cardHeight = 150;
 
@@ -15,7 +16,7 @@ export class CardSprite extends Container {
       .roundRect(0, 0, this.cardWidth, this.cardHeight, 10)
       .fill({ color: 0xffffff })
       .stroke({ color: 0x000000, width: 2 });
-
+    this.card = facedown ? undefined : card;
     this.addChild(this.background);
 
     if (facedown) {
@@ -26,6 +27,7 @@ export class CardSprite extends Container {
   }
 
   private renderFront(card: Card) {
+    this.card = card;
     const isRedSuit = card.suit === '♥' || card.suit === '♦';
     const suitColor = isRedSuit ? 0xff0000 : 0x000000;
 
@@ -71,5 +73,9 @@ export class CardSprite extends Container {
       .stroke({ color: 0x000000, width: 2 });
     this.addChild(this.background);
     this.renderFront(card);
+  }
+
+  public getCard(): Card | undefined {
+    return this.card;
   }
 }
