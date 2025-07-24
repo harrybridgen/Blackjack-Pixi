@@ -1,10 +1,10 @@
 import { GameModel } from './GameModel';
-import { GameView } from "./GameView";
-import type { ViewHandlers } from "./GameView";
+import { GameView } from './GameView';
+import type { ViewHandlers } from './GameView';
 
 export class GameController {
   private model = new GameModel();
-  private view: GameView;
+  private view!: GameView;
 
   async init() {
     const handlers: ViewHandlers = {
@@ -59,11 +59,7 @@ export class GameController {
     this.model.playerHand.push(this.model.deck.draw()!);
 
     this.view.updateInfo('Your turn!');
-    this.view.renderHands(
-      this.model.playerHand,
-      this.model.dealerHand,
-      this.model.dealerFacedown,
-    );
+    this.view.renderHands(this.model.playerHand, this.model.dealerHand, this.model.dealerFacedown);
     this.view.positionElements();
   }
 
@@ -75,11 +71,7 @@ export class GameController {
     }
 
     this.model.playerHand.push(card);
-    this.view.renderHands(
-      this.model.playerHand,
-      this.model.dealerHand,
-      this.model.dealerFacedown,
-    );
+    this.view.renderHands(this.model.playerHand, this.model.dealerHand, this.model.dealerFacedown);
 
     const playerValue = this.model.calculateHandValue(this.model.playerHand);
     if (playerValue > 21) {

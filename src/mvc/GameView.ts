@@ -26,7 +26,11 @@ export class GameView {
   private playerSprites: CardSprite[] = [];
   private dealerSprites: CardSprite[] = [];
 
-  constructor(private handlers: ViewHandlers) {
+  private handlers: ViewHandlers;
+
+  constructor(handlers: ViewHandlers) {
+    this.handlers = handlers;
+
     this.moneyText = new Text({
       text: 'Money: $0',
       style: { fontFamily: 'monospace', fontSize: 20, fill: 0xffffff },
@@ -45,11 +49,11 @@ export class GameView {
     });
     this.infoText.anchor.set(0.5);
 
-    this.placeBetButton = new Button('Bet $10', handlers.onPlaceBet);
-    this.startGameButton = new Button('Start Game', handlers.onStartGame);
-    this.hitButton = new Button('Hit', handlers.onHit);
-    this.stickButton = new Button('Stick', handlers.onStick);
-    this.playAgainButton = new Button('Play Again', handlers.onPlayAgain);
+    this.placeBetButton = new Button('Bet $10', this.handlers.onPlaceBet);
+    this.startGameButton = new Button('Start Game', this.handlers.onStartGame);
+    this.hitButton = new Button('Hit', this.handlers.onHit);
+    this.stickButton = new Button('Stick', this.handlers.onStick);
+    this.playAgainButton = new Button('Play Again', this.handlers.onPlayAgain);
 
     this.hitButton.visible = false;
     this.stickButton.visible = false;
@@ -68,7 +72,7 @@ export class GameView {
       this.startGameButton,
       this.hitButton,
       this.stickButton,
-      this.playAgainButton,
+      this.playAgainButton
     );
     this.positionElements();
     window.addEventListener('resize', () => this.positionElements());
@@ -87,7 +91,11 @@ export class GameView {
   }
 
   renderHands(player: Card[], dealer: Card[], facedown?: Card) {
-    this.renderHand(this.playerSprites, player, this.app.screen.height - this.hitButton.height - 180);
+    this.renderHand(
+      this.playerSprites,
+      player,
+      this.app.screen.height - this.hitButton.height - 180
+    );
 
     const dealerCards = facedown ? [...dealer, facedown] : dealer;
     const facedownIndex = facedown ? dealerCards.length - 1 : -1;
@@ -124,7 +132,8 @@ export class GameView {
       this.playAgainButton,
     ].filter((btn) => btn.visible);
 
-    let totalWidth = buttons.reduce((sum, btn) => sum + btn.width, 0) + spacing * (buttons.length - 1);
+    let totalWidth =
+      buttons.reduce((sum, btn) => sum + btn.width, 0) + spacing * (buttons.length - 1);
     let currentX = this.app.screen.width / 2 - totalWidth / 2;
 
     buttons.forEach((btn) => {
