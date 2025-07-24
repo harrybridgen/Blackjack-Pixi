@@ -47,7 +47,13 @@ export class GameView {
 
     this.infoText = new Text({
       text: 'Place your bet!',
-      style: { fontFamily: 'monospace', fontSize: 28, fill: 0xffff00 },
+      style: {
+        fontFamily: 'monospace',
+        fontSize: 28,
+        fill: 0xffff00,
+        align: 'center',
+        wordWrap: true,
+      },
     });
     this.infoText.anchor.set(0.5);
 
@@ -125,9 +131,18 @@ export class GameView {
   }
 
   positionElements() {
-    this.infoText.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
+    const width = this.app.screen.width;
+    const height = this.app.screen.height;
 
-    const buttonY = this.app.screen.height - 60;
+    this.infoText.style.wordWrapWidth = width - 20;
+    this.infoText.style.fontSize = width < 360 ? 20 : 28;
+    this.infoText.position.set(width / 2, height / 2);
+
+    const textFontSize = width < 360 ? 16 : 20;
+    this.moneyText.style.fontSize = textFontSize;
+    this.betText.style.fontSize = textFontSize;
+    const buttonY = height - 60;
+
     const spacing = 10;
     const buttons = [
       this.placeBetButton,
