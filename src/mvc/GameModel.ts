@@ -1,6 +1,6 @@
 export type Hand = 'player' | 'dealer';
-import { Deck } from '../objects/deck';
-import type { Card } from '../objects/card';
+import { Deck } from '../objects/CardDeck';
+import type { Card } from '../objects/Card';
 
 export class GameModel {
   public deck = new Deck();

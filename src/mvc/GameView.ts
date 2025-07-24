@@ -1,7 +1,7 @@
 import { Application, Text } from 'pixi.js';
-import { Button } from '../objects/button';
-import { CardSprite } from '../objects/cardsprite';
-import type { Card } from '../objects/card';
+import { Button } from '../objects/GameButton';
+import { CardSprite } from '../objects/CardSprite';
+import type { Card } from '../objects/Card';
 
 export type ViewHandlers = {
   onPlaceBet: () => void;

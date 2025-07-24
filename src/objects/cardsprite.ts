@@ -1,5 +1,5 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-import type { Card } from './card';
+import type { Card } from './Card';
 
 export class CardSprite extends Container {
   private background: Graphics;

@@ -1,4 +1,4 @@
-import type { Card } from './card';
+import type { Card } from './Card';
 
 const suits = ['♠', '♥', '♦', '♣'];
 const values = [
