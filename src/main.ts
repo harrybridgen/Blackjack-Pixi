@@ -11,9 +11,15 @@ async function init() {
 
   document.body.appendChild(app.canvas);
 
+  const playerHand: CardSprite[] = [];
+  const dealerHand: CardSprite[] = [];
   const deck = new Deck();
 
-  const cardText = new Text({
+  dealerHand.push(new CardSprite(deck.draw()!));
+  dealerHand.push(new CardSprite(deck.draw()!));
+  renderHand(dealerHand, 40); // Dealer hand at top
+
+  const infoText = new Text({
     text: 'No card drawn yet.',
     style: {
       fontFamily: 'monospace',
@@ -21,34 +27,23 @@ async function init() {
       fill: 0xffff00,
     },
   });
-  cardText.anchor.set(0.5);
-  app.stage.addChild(cardText);
+
+  infoText.anchor.set(0.5);
+  app.stage.addChild(infoText);
 
   const drawButton = new Button('Draw Card', () => {
     const card = deck.draw();
-
-    const existing = app.stage.getChildByLabel('drawnCard');
-    if (existing) {
-      app.stage.removeChild(existing);
+    if (!card) {
+      infoText.text = 'Deck is empty!';
+      infoText.visible = true;
+      return;
     }
 
-    if (card) {
-      cardText.visible = false;
+    infoText.visible = false;
 
-      const cardSprite = new CardSprite(card);
-      cardSprite.label = 'drawnCard';
-
-      const cardX = app.screen.width / 2 - cardSprite.width / 2;
-      const cardY = drawButton.y - cardSprite.height - 20; // 20px margin above the button
-
-      cardSprite.position.set(cardX, cardY);
-      app.stage.addChild(cardSprite);
-    } else {
-      cardText.text = 'Deck is empty!';
-      cardText.visible = true;
-    }
-
-    positionElements();
+    const cardSprite = new CardSprite(card);
+    playerHand.push(cardSprite);
+    renderHand(playerHand, app.screen.height - drawButton.height - 180);
   });
 
   app.stage.addChild(drawButton);
@@ -65,18 +60,30 @@ async function init() {
   statsText.y = 10;
   app.stage.addChild(statsText);
 
+  function renderHand(hand: CardSprite[], y: number) {
+    for (const card of hand) app.stage.removeChild(card);
+
+    const cardSpacing = 70;
+    const baseCardWidth = 100;
+    const totalWidth = (hand.length - 1) * cardSpacing + baseCardWidth;
+    const startX = app.screen.width / 2 - totalWidth / 2;
+
+    hand.forEach((card, index) => {
+      card.position.set(startX + index * cardSpacing, y);
+      app.stage.addChild(card);
+    });
+  }
+
   function positionElements() {
-    cardText.position.set(app.screen.width / 2, app.screen.height / 2 - 100);
+    infoText.position.set(app.screen.width / 2, app.screen.height / 2);
 
     drawButton.position.set(
       (app.screen.width - drawButton.width) / 2,
-      app.screen.height - drawButton.height - 30
+      app.screen.height - drawButton.height - 20
     );
 
-    const card = app.stage.getChildByLabel('drawnCard') as CardSprite | null;
-    if (card) {
-      card.position.set(app.screen.width / 2 - card.width / 2, drawButton.y - card.height - 20);
-    }
+    renderHand(playerHand, app.screen.height - drawButton.height - 180);
+    renderHand(dealerHand, 40);
   }
 
   positionElements();
