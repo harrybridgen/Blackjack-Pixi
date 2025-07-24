@@ -13,6 +13,7 @@ export class GameController {
       onHit: () => this.hit(),
       onStick: () => this.stick(),
       onPlayAgain: () => this.playAgain(),
+      onResetGame: () => this.resetFullGame(),
     };
     this.view = new GameView(handlers);
     await this.view.init();
@@ -23,7 +24,25 @@ export class GameController {
     this.view.updateMoney(this.model.playerMoney);
     this.view.updateBet(this.model.currentBet);
   }
+  private resetFullGame() {
+    this.model.playerMoney = 100;
+    this.updateTexts();
+    this.resetGame();
+  }
+  private resetGame() {
+    this.model.resetHands();
+    this.model.currentBet = 0;
+    this.view.updateBet(this.model.currentBet);
+    this.view.updateInfo('Place your bet!');
 
+    this.view.placeBetButton.visible = true;
+    this.view.startGameButton.visible = false;
+    this.view.playAgainButton.visible = false;
+    this.view.resetGameButton.visible = false;
+
+    this.view.renderHands(this.model.playerHand, this.model.dealerHand);
+    this.view.positionElements();
+  }
   private placeBet() {
     if (this.model.playerMoney >= 10) {
       this.model.playerMoney -= 10;
@@ -120,7 +139,7 @@ export class GameController {
   }
 
   private playAgain() {
-    this.resetGame();
+    this.mewRound();
   }
 
   private revealDealerCard() {
@@ -134,11 +153,17 @@ export class GameController {
   private endRound() {
     this.view.hitButton.visible = false;
     this.view.stickButton.visible = false;
-    this.view.playAgainButton.visible = true;
+    if (this.model.playerMoney <= 0) {
+      this.view.resetGameButton.visible = true;
+      this.view.playAgainButton.visible = false;
+    } else {
+      this.view.playAgainButton.visible = true;
+      this.view.resetGameButton.visible = false;
+    }
     this.view.renderHands(this.model.playerHand, this.model.dealerHand);
   }
 
-  private resetGame() {
+  private mewRound() {
     this.model.resetHands();
     this.model.currentBet = 0;
     this.view.updateBet(this.model.currentBet);

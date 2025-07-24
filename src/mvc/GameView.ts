@@ -9,6 +9,7 @@ export type ViewHandlers = {
   onHit: () => void;
   onStick: () => void;
   onPlayAgain: () => void;
+  onResetGame: () => void;
 };
 
 export class GameView {
@@ -22,6 +23,7 @@ export class GameView {
   public readonly hitButton: Button;
   public readonly stickButton: Button;
   public readonly playAgainButton: Button;
+  public readonly resetGameButton: Button;
 
   private playerSprites: CardSprite[] = [];
   private dealerSprites: CardSprite[] = [];
@@ -54,11 +56,13 @@ export class GameView {
     this.hitButton = new Button('Hit', this.handlers.onHit);
     this.stickButton = new Button('Stick', this.handlers.onStick);
     this.playAgainButton = new Button('Play Again', this.handlers.onPlayAgain);
+    this.resetGameButton = new Button('Reset Game', this.handlers.onResetGame);
 
     this.hitButton.visible = false;
     this.stickButton.visible = false;
     this.startGameButton.visible = false;
     this.playAgainButton.visible = false;
+    this.resetGameButton.visible = false;
   }
 
   async init() {
@@ -72,7 +76,8 @@ export class GameView {
       this.startGameButton,
       this.hitButton,
       this.stickButton,
-      this.playAgainButton
+      this.playAgainButton,
+      this.resetGameButton
     );
     this.positionElements();
     window.addEventListener('resize', () => this.positionElements());
@@ -130,6 +135,7 @@ export class GameView {
       this.hitButton,
       this.stickButton,
       this.playAgainButton,
+      this.resetGameButton,
     ].filter((btn) => btn.visible);
 
     let totalWidth =
