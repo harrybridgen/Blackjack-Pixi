@@ -24,25 +24,13 @@ export class GameController {
     this.view.updateMoney(this.model.playerMoney);
     this.view.updateBet(this.model.currentBet);
   }
+
   private resetFullGame() {
     this.model.playerMoney = 100;
     this.updateTexts();
-    this.resetGame();
+    this.mewRound();
   }
-  private resetGame() {
-    this.model.resetHands();
-    this.model.currentBet = 0;
-    this.view.updateBet(this.model.currentBet);
-    this.view.updateInfo('Place your bet!');
 
-    this.view.placeBetButton.visible = true;
-    this.view.startGameButton.visible = false;
-    this.view.playAgainButton.visible = false;
-    this.view.resetGameButton.visible = false;
-
-    this.view.renderHands(this.model.playerHand, this.model.dealerHand);
-    this.view.positionElements();
-  }
   private placeBet() {
     if (this.model.playerMoney >= 10) {
       this.model.playerMoney -= 10;
@@ -165,6 +153,7 @@ export class GameController {
 
   private mewRound() {
     this.model.resetHands();
+    this.model.deck.reset();
     this.model.currentBet = 0;
     this.view.updateBet(this.model.currentBet);
     this.view.updateInfo('Place your bet!');
@@ -172,6 +161,7 @@ export class GameController {
     this.view.placeBetButton.visible = true;
     this.view.startGameButton.visible = false;
     this.view.playAgainButton.visible = false;
+    this.view.resetGameButton.visible = false;
 
     this.view.renderHands(this.model.playerHand, this.model.dealerHand);
     this.view.positionElements();
