@@ -29,14 +29,18 @@ export class CardSprite extends Container {
     this.valueText.x = 8;
     this.valueText.y = 8;
 
+    const isRedSuit = card.suit === '♥' || card.suit === '♦';
+    const suitColor = isRedSuit ? 0xff0000 : 0x000000;
+
     this.suitText = new Text({
       text: card.suit,
       style: new TextStyle({
         fontSize: 40,
-        fill: 0x000000,
+        fill: suitColor,
         fontFamily: 'monospace',
       }),
     });
+
     this.suitText.anchor.set(0.5);
     this.suitText.x = this.cardWidth / 2;
     this.suitText.y = this.cardHeight / 2;
