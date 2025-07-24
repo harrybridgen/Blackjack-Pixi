@@ -20,118 +20,55 @@ async function init() {
   let facedownCard: Card;
   let facedownSprite: CardSprite;
 
-  dealerHand.push(new CardSprite(deck.draw()!));
-  facedownCard = deck.draw()!;
-  facedownSprite = new CardSprite(facedownCard, true);
-  dealerHand.push(facedownSprite);
+  let playerMoney = 100;
+  let currentBet = 0;
 
-  playerHand.push(new CardSprite(deck.draw()!));
-  playerHand.push(new CardSprite(deck.draw()!));
+  const moneyText = new Text({
+    text: `Money: $${playerMoney}`,
+    style: { fontFamily: 'monospace', fontSize: 20, fill: 0xffffff },
+  });
+  moneyText.position.set(10, 10);
+  app.stage.addChild(moneyText);
+
+  const betText = new Text({
+    text: `Current Bet: $${currentBet}`,
+    style: { fontFamily: 'monospace', fontSize: 20, fill: 0xffffff },
+  });
+  betText.position.set(10, 40);
+  app.stage.addChild(betText);
 
   const infoText = new Text({
-    text: 'Your turn!',
-    style: {
-      fontFamily: 'monospace',
-      fontSize: 28,
-      fill: 0xffff00,
-    },
+    text: 'Place your bet!',
+    style: { fontFamily: 'monospace', fontSize: 28, fill: 0xffff00 },
   });
-
   infoText.anchor.set(0.5);
   app.stage.addChild(infoText);
 
-  const hitButton = new Button('Hit', () => {
-    const card = deck.draw();
-    if (!card) {
-      infoText.text = 'Deck is empty!';
-      infoText.visible = true;
+  const placeBetButton = new Button('Bet $10', () => {
+    if (playerMoney >= 10) {
+      playerMoney -= 10;
+      currentBet += 10;
+      moneyText.text = `Money: $${playerMoney}`;
+      betText.text = `Current Bet: $${currentBet}`;
+      infoText.text = 'Bet placed! Start the game!';
+      startGameButton.visible = true;
+      positionElements();
+    } else {
+      infoText.text = 'Not enough money!';
+      positionElements();
+    }
+  });
+
+  const startGameButton = new Button('Start Game', () => {
+    if (currentBet === 0) {
+      infoText.text = 'Please place a bet first!';
       return;
     }
-    playerHand.push(new CardSprite(card));
-    renderHands();
 
-    const playerValue = calculateHandValue(playerHand);
-    if (playerValue > 21) {
-      infoText.text = `You bust!`;
-      facedownSprite.reveal(facedownCard);
-      renderHands();
-
-      hitButton.visible = false;
-      stickButton.visible = false;
-      playAgainButton.visible = true;
-    } else {
-      infoText.text = `You drew a card`;
-    }
-  });
-
-  const playAgainButton = new Button('Play Again', () => {
-    resetGame();
-  });
-
-  playAgainButton.visible = false;
-  app.stage.addChild(playAgainButton);
-
-  const stickButton = new Button('Stick', () => {
-    facedownSprite.reveal(facedownCard);
-    renderHands();
-
-    const playerValue = calculateHandValue(playerHand);
-    const dealerValue = calculateHandValue(dealerHand);
-
-    let result = `You: ${playerValue} | Dealer: ${dealerValue}\n`;
-
-    if (dealerValue > 21 || playerValue > dealerValue) {
-      result += 'You win!';
-    } else if (playerValue < dealerValue) {
-      result += 'Dealer wins!';
-    } else {
-      result += 'Push!';
-    }
-
-    infoText.text = result;
-    hitButton.visible = false;
-    stickButton.visible = false;
-    playAgainButton.visible = true;
-  });
-
-  const statsText = new Text({
-    text: '',
-    style: {
-      fontFamily: 'monospace',
-      fontSize: 14,
-      fill: 0xffffff,
-    },
-  });
-  statsText.x = 10;
-  statsText.y = 10;
-  app.stage.addChild(statsText);
-
-  app.stage.addChild(hitButton, stickButton);
-
-  function calculateHandValue(hand: CardSprite[]): number {
-    let total = 0;
-    let aceCount = 0;
-
-    for (const sprite of hand) {
-      const card = sprite.getCard();
-      if (card) {
-        total += card.score;
-        if (card.value === 'A') aceCount++;
-      }
-    }
-
-    while (total > 21 && aceCount > 0) {
-      total -= 10;
-      aceCount--;
-    }
-
-    return total;
-  }
-  function resetGame() {
-    for (const card of playerHand) app.stage.removeChild(card);
-    for (const card of dealerHand) app.stage.removeChild(card);
-    playerHand.length = 0;
-    dealerHand.length = 0;
+    startGameButton.visible = false;
+    placeBetButton.visible = false;
+    hitButton.visible = true;
+    stickButton.visible = true;
 
     deck.reset();
 
@@ -144,12 +81,117 @@ async function init() {
     playerHand.push(new CardSprite(deck.draw()!));
 
     infoText.text = 'Your turn!';
-    hitButton.visible = true;
-    stickButton.visible = true;
+    renderHands();
+    positionElements();
+  });
+
+  const hitButton = new Button('Hit', () => {
+    const card = deck.draw();
+    if (!card) {
+      infoText.text = 'Deck is empty!';
+      return;
+    }
+    playerHand.push(new CardSprite(card));
+    renderHands();
+
+    const playerValue = calculateHandValue(playerHand);
+    if (playerValue > 21) {
+      infoText.text = `You bust! You lost $${currentBet}`;
+      facedownSprite.reveal(facedownCard);
+      renderHands();
+      positionElements();
+      currentBet = 0;
+      betText.text = `Current Bet: $${currentBet}`;
+      endRound();
+    } else {
+      infoText.text = `You drew a card`;
+    }
+  });
+
+  const stickButton = new Button('Stick', () => {
+    facedownSprite.reveal(facedownCard);
+    renderHands();
+
+    const playerValue = calculateHandValue(playerHand);
+    let dealerValue = calculateHandValue(dealerHand);
+
+    while (dealerValue < 17) {
+      dealerHand.push(new CardSprite(deck.draw()!));
+      dealerValue = calculateHandValue(dealerHand);
+      renderHands();
+    }
+
+    let result = `You: ${playerValue} | Dealer: ${dealerValue}\n`;
+
+    if (dealerValue > 21 || playerValue > dealerValue) {
+      result += `You win! You earned $${currentBet * 2}`;
+      playerMoney += currentBet * 2;
+    } else if (playerValue < dealerValue) {
+      result += `Dealer wins! You lost $${currentBet}`;
+    } else {
+      result += `Push! You get back $${currentBet}`;
+      playerMoney += currentBet;
+    }
+
+    moneyText.text = `Money: $${playerMoney}`;
+    currentBet = 0;
+    betText.text = `Current Bet: $${currentBet}`;
+    infoText.text = result;
+    endRound();
+    positionElements();
+  });
+
+  const playAgainButton = new Button('Play Again', () => {
+    resetGame();
+  });
+
+  function endRound() {
+    hitButton.visible = false;
+    stickButton.visible = false;
+    playAgainButton.visible = true;
+    renderHands();
+  }
+
+  playAgainButton.visible = false;
+  hitButton.visible = false;
+  stickButton.visible = false;
+  startGameButton.visible = false;
+
+  app.stage.addChild(hitButton, stickButton, playAgainButton, placeBetButton, startGameButton);
+
+  function resetGame() {
+    for (const card of playerHand) app.stage.removeChild(card);
+    for (const card of dealerHand) app.stage.removeChild(card);
+    playerHand.length = 0;
+    dealerHand.length = 0;
+
+    currentBet = 0;
+    betText.text = `Current Bet: $${currentBet}`;
+
+    infoText.text = 'Place your bet!';
+    placeBetButton.visible = true;
+    startGameButton.visible = false;
     playAgainButton.visible = false;
 
     renderHands();
     positionElements();
+  }
+
+  function calculateHandValue(hand: CardSprite[]): number {
+    let total = 0;
+    let aceCount = 0;
+    for (const sprite of hand) {
+      const card = sprite.getCard();
+      if (card) {
+        total += card.score;
+        if (card.value === 'A') aceCount++;
+      }
+    }
+    while (total > 21 && aceCount > 0) {
+      total -= 10;
+      aceCount--;
+    }
+    return total;
   }
 
   function renderHands() {
@@ -175,24 +217,30 @@ async function init() {
     infoText.position.set(app.screen.width / 2, app.screen.height / 2);
 
     const buttonY = app.screen.height - 60;
-    const buttonSpacing = 10;
-    const totalWidth = hitButton.width + stickButton.width + buttonSpacing;
-    const startX = app.screen.width / 2 - totalWidth / 2;
+    const spacing = 10;
 
-    hitButton.position.set(startX, buttonY);
-    stickButton.position.set(startX + hitButton.width + buttonSpacing, buttonY);
-    playAgainButton.position.set(app.screen.width / 2 - playAgainButton.width / 2, buttonY);
+    const buttons = [
+      placeBetButton,
+      startGameButton,
+      hitButton,
+      stickButton,
+      playAgainButton,
+    ].filter((btn) => btn.visible);
+
+    let totalWidth =
+      buttons.reduce((sum, btn) => sum + btn.width, 0) + spacing * (buttons.length - 1);
+    let currentX = app.screen.width / 2 - totalWidth / 2;
+
+    buttons.forEach((btn) => {
+      btn.position.set(currentX, buttonY);
+      currentX += btn.width + spacing;
+    });
 
     renderHands();
   }
 
   positionElements();
   window.addEventListener('resize', positionElements);
-
-  app.ticker.add(() => {
-    statsText.text =
-      `FPS: ${app.ticker.FPS.toFixed(2)}\n` + `Elapsed: ${app.ticker.elapsedMS.toFixed(2)} ms`;
-  });
 }
 
 init();
