@@ -1,6 +1,6 @@
-import { GameModel } from './GameModel';
-import { GameView } from './GameView';
-import type { ViewHandlers } from './GameView';
+import { GameModel } from './gameModel';
+import { GameView } from './gameView';
+import type { ViewHandlers } from './gameView';
 
 export class GameController {
   private model = new GameModel();
